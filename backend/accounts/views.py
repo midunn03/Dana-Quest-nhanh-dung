@@ -22,6 +22,7 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_http_methods
 
 from .models import Profile
+from .ownership import owner_error
 
 User = get_user_model()
 
@@ -96,6 +97,9 @@ def check_username(name, exclude_pk=None):
 def session(request):
     if not request.user.is_authenticated:
         return fail(401, 'Chưa đăng nhập.')
+    error = owner_error(request, bootstrap=True)
+    if error is not None:
+        return error
     return JsonResponse({'user': public_user(request.user)})
 
 
@@ -157,6 +161,10 @@ def login_view(request):
 
 @require_http_methods(['POST'])
 def logout_view(request):
+    if request.user.is_authenticated:
+        error = owner_error(request)
+        if error is not None:
+            return error
     logout(request)
     return JsonResponse({'ok': True})
 
@@ -165,6 +173,9 @@ def logout_view(request):
 def avatar(request):
     if not request.user.is_authenticated:
         return fail(401, 'Chưa đăng nhập.')
+    error = owner_error(request)
+    if error is not None:
+        return error
     data = read_json(request)
     if data is None:
         return fail(400, 'Dữ liệu không hợp lệ.')
@@ -180,6 +191,9 @@ def avatar(request):
 def profile(request):
     if not request.user.is_authenticated:
         return fail(401, 'Chưa đăng nhập.')
+    error = owner_error(request)
+    if error is not None:
+        return error
     data = read_json(request)
     if data is None:
         return fail(400, 'Dữ liệu không hợp lệ.')

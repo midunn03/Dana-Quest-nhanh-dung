@@ -1,6 +1,6 @@
 # Dana Quest — nhanh dung
 
-Private source snapshot of `Dana-Quest-nhanh-dung`, prepared for UI fixes and code review. This repository is separate from the original Dana-Quest repository and starts with a fresh Git history.
+Source snapshot of `Dana-Quest-nhanh-dung`, prepared for UI fixes and code review. This repository is separate from the original Dana-Quest repository and starts with a fresh Git history.
 
 ## Run locally
 
@@ -21,7 +21,9 @@ npm test -- --maxWorkers=2
 npm run lint
 ```
 
-The latest verified baseline contains 238 tests. Standalone browser scripts in tests/ and scripts/ currently refer to the original Windows Chrome/runtime paths; adapt those paths to your execution environment rather than changing game expectations.
+Latest verified checks: build passes,252web tests pass,41Django tests pass using an isolated in-memory database, and8existing React lint warnings remain. Django is retained for administration; new backend migration files have not been applied to live data. The UI now uses the approved green v2.2 palette. Read the [staged review report](docs/REVIEW-FIX-REPORT-2026-10-31.md) for implemented work, proposals and remaining A4/release prerequisites.
+
+Standalone browser scripts in tests/ and scripts/ may refer to the original Windows Chrome/runtime paths; adapt those paths to your execution environment rather than changing game expectations. The new `scripts/verify-f-ui.cjs` accepts `DANA_PLAYWRIGHT` and `DANA_BROWSER` and intercepts API requests with isolated visual fixtures.
 
 ## Find the code
 

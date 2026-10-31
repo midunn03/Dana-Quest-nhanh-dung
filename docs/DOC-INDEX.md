@@ -57,3 +57,12 @@ Thư mục gốc dự án: `Dana-Quest-nhanh-dung/`. Quyết định cuối cùn
 - `.env.example` — placeholder biến môi trường, giải thích tại `docs/ENV.md`.
 - `reference-review-20261026/` — ảnh tham khảo brand/Questo do người dùng cung cấp.
 - `docs/PHASE-1-CODEBASE-AUDIT.md`, `docs/SYSTEM-AUDIT-2026-10-27.md`, `docs/PLAYER-EXPERIENCE-HANDOFF-2026-10-28.md` — bằng chứng audit/bàn giao; nguồn của các mục trong CHANGELOG.
+
+## 4. Đề xuất nhóm G —31/10/2026, chưa triển khai
+
+- `docs/SHARED-RULES-PROPOSAL.md` — kiểm kê luật legacy/v2/Node/Django, một đặc tả dùng chung và test đối chiếu.
+- `docs/LEGACY-TRANSITION-PROPOSAL.md` — chuyển theo lát, không ghi đè, nguồn thưởng duy nhất, giữ route/dữ liệu cũ.
+- `docs/ARRIVAL-VERIFICATION-PROPOSAL.md` — hiện trạng visual DUE và lựa chọn GPS chờ O-04; không tự bật GPS.
+- `docs/ROUTE-LOADING-PROPOSAL.md` — lazy imports đang có, baseline bundle và cách đo sau khi UI ổn định.
+
+Đây là **đề xuất**, không phải thay đổi sản phẩm đã được duyệt. Phần màu xanh v2.2 và giữ Django đã có quyết định ở đầu TASKS.md; O-04, chính sách local/legacy và chuyển ví/backend vẫn chưa tự được chốt. Xem `docs/REVIEW-FIX-REPORT-2026-10-31.md` để phân biệt phần đã code với phần chỉ viết tài liệu.

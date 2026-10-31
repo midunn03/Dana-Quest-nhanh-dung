@@ -10,6 +10,7 @@ import {loadPresentationEvents} from './presentation-events.mjs'
 import { createAccountFeatures } from './account-features.mjs'
 import { createQuestCommunity, isCommunityQuest } from './quest-community.mjs'
 import { readFileSync } from 'node:fs'
+import { clientAddress, createAttemptLimiter } from './auth-rate-limit.mjs'
 const cityEventCatalog=JSON.parse(readFileSync(new URL('../shared/city-events.json',import.meta.url),'utf8'))
 const questCatalog=JSON.parse(readFileSync(new URL('../src/data/questCatalog.json',import.meta.url),'utf8'))
 
@@ -44,7 +45,7 @@ function unique(users, email, phone, name, currentId = null) {
 const fail = (status, message) => Object.assign(new Error(message), { status })
 
 // Local development service: one Node process, durable accounts, in-memory sessions.
-export function createAuthApi({ file = resolve('.data/accounts.json'), eventClock = Date.now, presentationEnabled = process.env.DANA_PRESENTATION_EVENTS==='1' } = {}) {
+export function createAuthApi({ file = resolve('.data/accounts.json'), eventClock = Date.now, presentationEnabled = process.env.DANA_PRESENTATION_EVENTS==='1', trustProxy = process.env.TRUST_PROXY==='1' } = {}) {
   const game = createAccountData(resolve(dirname(file), 'players'))
   const codes = createActivationStore(resolve(dirname(file), 'quest-codes.json'))
   const questRuns = createQuestRuns(resolve(dirname(file), 'quest-runs'))
@@ -60,7 +61,7 @@ export function createAuthApi({ file = resolve('.data/accounts.json'), eventCloc
   })
   const deleting = new Set()
   const sessions = new Map()
-  const attempts = new Map()
+  const attempts = createAttemptLimiter()
   let queue = Promise.resolve()
   async function load() {
     try { return JSON.parse(await readFile(file, 'utf8')) }
@@ -91,6 +92,7 @@ export function createAuthApi({ file = resolve('.data/accounts.json'), eventCloc
       res.end(JSON.stringify(data))
     }
     void (async () => {
+      attempts.prune()
       const secure = Boolean(req.socket.encrypted)
       const origin = `${secure ? 'https' : 'http'}://${req.headers.host}`
       if (req.headers.origin && req.headers.origin !== origin) throw fail(403, 'Yêu cầu khác nguồn không được phép.')
@@ -190,10 +192,7 @@ export function createAuthApi({ file = resolve('.data/accounts.json'), eventCloc
         return send(200,{events:value.events,enabled:value.preferences.inApp,serverNow:eventClock(),notice:value.eventResult?.notice??null,catalog:eventCatalog(session.userId)})
       }
       if(['/api/auth/password','/api/auth/delete-account'].includes(path)){
-        const id=`sensitive:${session.userId}`,now=Date.now(),previous=attempts.get(id)
-        const value=previous&&previous.until>now?previous:{count:0,until:now+60000}
-        value.count++;attempts.set(id,value)
-        if(value.count>10)throw fail(429,'Bạn đã thử quá nhiều lần. Vui lòng chờ một phút.')
+        if(!attempts.consume(`sensitive:${session.userId}`,10,60000))throw fail(429,'Bạn đã thử quá nhiều lần. Vui lòng chờ một phút.')
       }
       if(path==='/api/auth/password'&&req.method==='POST'){
         if(typeof input.currentPassword!=='string'||typeof input.newPassword!=='string'||input.newPassword.length<6||input.newPassword.length>128)throw fail(400,'Mật khẩu mới phải từ 6 đến 128 ký tự.')
@@ -225,11 +224,7 @@ export function createAuthApi({ file = resolve('.data/accounts.json'), eventCloc
       if (path === '/api/auth/quest-runs' && req.method === 'POST') return send(200, await questRuns.update(session.userId, input))
       if (path === '/api/auth/quest-codes/redeem' && req.method === 'POST') {
         if (!session) throw fail(401, 'Hãy đăng nhập trước khi kích hoạt mã.')
-        const attemptKey = `codes:${session.userId}`
-        const previous = attempts.get(attemptKey)
-        const attempt = previous && previous.expires > Date.now() ? previous : { count: 0, expires: Date.now() + 60000 }
-        attempt.count++; attempts.set(attemptKey, attempt)
-        if (attempt.count > 10) throw fail(429, 'Bạn đã thử quá nhiều mã. Hãy chờ một phút rồi thử lại.')
+        if (!attempts.consume(`codes:${session.userId}`,10,60000)) throw fail(429, 'Bạn đã thử quá nhiều mã. Hãy chờ một phút rồi thử lại.')
         return send(200, await codes.redeem(input.code, session.userId))
       }
       if (path === '/api/auth/wallet' && req.method === 'POST') return send(200, await wallet.redeem(session.userId, input.rewardId))
@@ -276,11 +271,8 @@ export function createAuthApi({ file = resolve('.data/accounts.json'), eventCloc
         return send(200, { user: publicUser(user) })
       }
       if (!['/api/auth/register', '/api/auth/login'].includes(path) || req.method !== 'POST') throw fail(404, 'Không tìm thấy chức năng.')
-      const address = req.socket.remoteAddress
-      for (const [id, value] of attempts) if (value.until < Date.now()) attempts.delete(id)
-      const attempt = attempts.get(address) ?? { count: 0, until: Date.now() + 60_000 }
-      attempts.set(address, attempt)
-      if (++attempt.count > 15) throw fail(429, 'Bạn thao tác quá nhanh. Vui lòng thử lại sau một phút.')
+      const address = clientAddress(req, trustProxy)
+      if (!attempts.consume(`ip:${address}`,15,60000)) throw fail(429, 'Bạn thao tác quá nhanh. Vui lòng thử lại sau một phút.')
       const name = typeof input.name === 'string' ? input.name.trim() : (typeof input.username === 'string' ? input.username.trim() : (typeof input.email === 'string' ? input.email.split('@')[0] : ''))
       const email = typeof input.email === 'string' ? input.email.trim().toLowerCase() : ''
       const phone = normalizePhone(input.phone)
@@ -302,11 +294,20 @@ export function createAuthApi({ file = resolve('.data/accounts.json'), eventCloc
           return record
         })
       } else {
-        const identifier = (input.username || input.name || input.email || '').trim().toLowerCase()
+        const suppliedIdentifier = input.username || input.name || input.email || ''
+        if (typeof suppliedIdentifier !== 'string') throw fail(400, 'Vui lòng nhập tên đăng nhập hoặc email.')
+        const identifier = suppliedIdentifier.trim().toLowerCase()
         if (!identifier) throw fail(400, 'Vui lòng nhập tên đăng nhập hoặc email.')
         user = (await load()).find(item => item.name.toLowerCase() === identifier || item.email.toLowerCase() === identifier)
-        const hash = await derive(password, user?.salt ?? '00000000000000000000000000000000', 64)
-        if (!user || !timingSafeEqual(hash, Buffer.from(user.hash, 'hex'))) throw fail(401, 'Tên đăng nhập / email hoặc mật khẩu không đúng.')
+        const finishAttempt = attempts.beginLogin(user ? `account:${user.id}` : `account:missing:${digest(identifier)}`)
+        if (!finishAttempt) throw fail(429, 'Bạn đã nhập sai quá nhiều lần. Hãy thử lại sau 15 phút.')
+        let valid
+        try {
+          const hash = await derive(password, user?.salt ?? '00000000000000000000000000000000', 64)
+          valid = Boolean(user && timingSafeEqual(hash, Buffer.from(user.hash, 'hex')))
+        } catch (error) { finishAttempt(null); throw error }
+        finishAttempt(valid)
+        if (!valid) throw fail(401, 'Tên đăng nhập / email hoặc mật khẩu không đúng.')
       }
       const newToken = randomBytes(32).toString('hex')
       if(deleting.has(user.id))throw fail(409,'Tài khoản đang được xóa.')

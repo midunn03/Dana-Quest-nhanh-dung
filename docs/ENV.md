@@ -2,11 +2,11 @@
 
 > Biến liệt kê dưới đây được **đối chiếu trực tiếp với source** (`server/index.mjs`, `server/auth.mjs`,
 > `server/navigation.mjs`, `server/places.mjs`, `vite.config.ts`) ngày 28/10/2026. Không biến bắt buộc nào
-> phải đặt trước khi chạy: cấu hình mặc định đủ cho local.
+> phải đặt trước khi chạy Node local. Django có yêu cầu riêng bên dưới (cập nhật 31/10/2026).
 
 ## Required variables
 
-Không có biến bắt buộc. Mặc định đã chạy được local. Các biến tùy chọn:
+Node local không có biến bắt buộc. Django production bắt buộc `DJANGO_SECRET_KEY`. Các biến Node tùy chọn:
 
 `API_PORT`
 - Purpose: cổng của server API chạy độc lập (`npm run api`).
@@ -17,6 +17,39 @@ Không có biến bắt buộc. Mặc định đã chạy được local. Các b
 - Purpose: địa chỉ bind của server API độc lập.
 - Mặc định: `127.0.0.1`.
 - Secret: không.
+
+`TRUST_PROXY`
+- Mặc định `0`; chỉ đúng `1` mới dùng IP từ `X-Forwarded-For`. Khi tắt luôn dùng socket, bỏ qua header client tự gửi.
+- Khi bật: dùng IP trái nhất của chuỗi hợp lệ (tối đa 16 địa chỉ IP, 1024 ký tự); header sai quay về socket. Chuẩn hóa IPv6/IPv4-mapped để không tạo nhiều hạn mức cho một IP.
+- Chỉ bật khi proxy tin cậy **ghi đè/xóa header X-Forwarded-For đầu vào**, và client không thể truy cập origin bỏ qua proxy. Không tự bật trên Render chỉ vì có proxy; kiểm chứng chuỗi header thực tế trước. Xem [hướng dẫn proxy Express](https://expressjs.com/en/guide/behind-proxies/).
+- Giữ hạn mức IP 15 lần/phút. Thêm tối đa 5 lần sai liên tiếp/tài khoản trong cửa sổ 15 phút, dùng chung username/email và mọi IP; đăng nhập đúng xóa số lần sai. Yêu cầu đang xử lý cũng giữ chỗ để chống vượt hạn mức đồng thời. Hạn mức còn trong RAM và mất khi khởi động lại.
+- Các nhóm IP/account/sensitive/codes dùng chung trường `expires`, được dọn khi có yêu cầu xác thực tiếp theo.
+
+## Django: cấu hình an toàn và kiểm tra biệt lập
+
+Quyết định31/10/2026: **giữ Django để quản lý thông tin bằng admin**. Cấu hình dev hiện vẫn hybrid: Node xử lý `/api/auth`, Vite proxy `/api/pixel`, `/api/events`, `/media` tới Django8000. Việc thêm route Django không tự chuyển backend xác thực, không di chuyển tài khoản/phiên/tiến độ từ Node và không đổi proxy đang chạy.
+
+- `DJANGO_DEBUG`: mặc định tắt; chỉ chuỗi `1` bật. Local có thể đặt `DJANGO_DEBUG=1` để dùng khóa phát triển. Không dùng giá trị này khi deploy.
+- `DJANGO_SECRET_KEY`: bắt buộc khi debug tắt; thiếu/rỗng hoặc bằng khóa phát triển thì tiến trình báo lỗi rõ ràng. Cấp secret riêng qua môi trường triển khai, không ghi vào repo hay biến `VITE_*`.
+- `DJANGO_ALLOWED_HOSTS`: danh sách host phân cách dấu phẩy, mặc định `127.0.0.1,localhost`.
+- `DJANGO_CSRF_TRUSTED_ORIGINS`: danh sách origin đầy đủ scheme/port phân cách dấu phẩy; mặc định localhost và127.0.0.1 ở5173 và5174. Deploy cần danh sách HTTPS cụ thể.
+- Cơ sở cấu hình: [Django deployment checklist](https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/).
+- API riêng `/game`, `/profile`, `/profile/avatar`, `/logout` yêu cầu `X-Dana-User` trùng tài khoản cookie; tab cũ nhận409. `/session` cho phép thiếu header để tìm chủ phiên ban đầu; nếu gửi header sai vẫn bị từ chối.
+- Kiểm tra: `python backend/manage.py test accounts game --settings=config.test_settings`. Module này chỉ dùng SQLite trong bộ nhớ và MEDIA_ROOT trong TEMP; không dùng database/ảnh thật. Xem [Django test database](https://docs.djangoproject.com/en/5.2/topics/testing/overview/#the-test-database).
+- Migration nguồn `game/0002_gamestatebackup.py` thêm bản sao tiến độ trước reset. Chỉ đã chạy trong DB test; **chưa migrate database thật**. Trước khi triển khai backend Django, chủ dự án cần sao lưu và duyệt áp dụng migration riêng. Nếu chưa có bảng sao lưu, reset từ chối503 và giữ dữ liệu cũ.
+- Reset áp dụng snapshot state/ảnh hỏng; sao lưu JSON/revision/ảnh trong cùng transaction, giữ nguyên bytes và timestamp ảnh. Cơ chế cách ly ở mục bổ sung bên dưới. Trạng thái hỏng bị chặn422 ở mọi thao tác game khác. Luật chấm/thưởng không đổi.
+
+### Bổ sung Django được giữ lại —31/10/2026
+
+- Migration nguồn mới: `game/0003_gamestatebackup_photos_questactivationcode_and_more.py`, `game/0004_gamephoto_quarantined.py`. Thêm snapshot ảnh trong backup, tiến độ quest v2, mã kích hoạt băm, hạn mức thử mã và cờ cách ly ảnh lỗi. **Chưa áp dụng lên database thật**. Các trang/model mới cần schema được chủ dự án triển khai sau khi sao lưu/duyệt; không coi source migration là đã deploy.
+- Reset kiểm tra cả state và ảnh. Sao lưu toàn bộ JSON/revision/ảnh trước thay đổi. Nếu chỉ ảnh lỗi, giữ tiến độ/timestamp vẫn hợp lệ; ảnh lỗi hoặc vượt40 ảnh được cách ly khỏi album/kiểm chứng nhiệm vụ, giữ nguyên bytes/timestamp trong DB và backup. Album hợp lệ vẫn đọc được sau reset; lặp reset trên snapshot khỏe bị400.
+- Admin địa điểm/sự kiện vẫn dùng quyền staff/model và CSRF, không ép form admin gửi X-Dana-User. Trang xem tiến độ quest/backup/mã mới là chỉ đọc, tránh sửa thẳng qua guard gameplay. Không thêm giao diện phát mã hoặc migration dữ liệu mã cũ trong nhóm này.
+- `/api/pixel/places`, `/api/events/feed` vẫn công khai, chỉ GET; không yêu cầu đăng nhập/header. Nếu phiên đã đăng nhập và gửi header owner sai thì409 trước xử lý, kể cả POST; POST đúng owner vẫn405, không có API ghi công khai. Nội dung tiếp tục được sửa qua admin.
+- Django thêm `GET/POST /api/auth/quest-runs`, `GET /api/auth/quest-codes`, `POST /api/auth/quest-codes/redeem`. Mọi endpoint riêng này yêu cầu header owner đúng; trả409 `Tài khoản đã thay đổi. Hãy tải lại trang.` theo quest-runs Node. Ngoại lệ bảo mật có chủ đích: Node quest-codes hiện chưa bắt buộc header; Django bắt buộc để đáp ứng yêu cầu chống tab cũ. Các payload/status/message luồng bình thường đã đối chiếu Node HTTP bằng dữ liệu giả.
+- Thử mã giới hạn10/phút/tài khoản, lưu DB. Mã lưu SHA-256, cùng chuẩn DQ24ký tự hex, chuẩn hóa khoảng trắng/dấu gạch, hết hạn/thu hồi/mã đã dùng và retry cùng owner theo Node. Mã từng dùng nhưng chủ bị xóa không được kích hoạt lại.
+- Quest v2 giữ tự xác nhận đến điểm bắt đầu (visual), không thêm GPS. Server tự chấm; bỏ qua photoAvailable client. Các giá trị thưởng/catalog và API kết quả không đổi. Chưa bổ sung Django wallet/account-features/community parity hoặc phát thưởng thật.
+- SQLite bỏ qua select_for_update; conditional claim chặn đổi chủ mã, lỗi tranh chấp DB trả503 JSON sau rollback để client thử lại. Không tuyên bố đã kiểm thử tải nhiều người dùng.
+- Chạy test: `python backend/manage.py test accounts game pixels events --settings=config.test_settings`. Test contract cần Node có trong PATH (hoặc `DANA_TEST_NODE` trỏ tới executable), tạo HTTP server và file giả trong TEMP rồi dọn; không dùng `.data/` hoặc database/media thật. Test đối chiếu grader qua toàn bộ catalog không thay thế xác minh nội dung16quest ngoài thực địa(O-09).
 
 `DANA_PRESENTATION_EVENTS`
 - Purpose: bật công cụ sự kiện trình diễn (operator) cho tài khoản báo cáo. Chỉ đặt đúng `1` để bật.

@@ -1,7 +1,7 @@
 .explore-page .destination-dock.nearby-drawer { height:54px; max-height:65%; padding:0 var(--px-space-3); display:flex; flex-direction:column; overflow:hidden; transition:transform var(--px-duration) var(--px-ease), opacity var(--px-duration) var(--px-ease); }
 .explore-page .destination-dock.nearby-drawer.drawer-open { height:65%; }
 .explore-page .destination-dock.nearby-drawer.drawer-dragging { transition:none; }
-.nearby-handle { flex:0 0 54px; width:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:7px; background:transparent; border:0; color:var(--px-navy); font:inherit; font-size:var(--text-sm); font-weight:400; touch-action:none; cursor:grab; }
+.nearby-handle { flex:0 0 54px; width:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:7px; background:transparent; border:0; color:var(--px-ink); font:inherit; font-size:var(--text-sm); font-weight:400; touch-action:none; cursor:grab; }
 .nearby-content { overflow-y:auto; min-height:0; padding-bottom:var(--px-space-3); }
 .nearby-content[hidden] { display:none; }
 .player-location-marker { background:transparent; border:0; }

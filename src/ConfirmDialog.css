@@ -1,8 +1,8 @@
-.confirm-backdrop { position:fixed; inset:0; z-index:3000; display:grid; place-items:center; padding:var(--px-space-5); background:color-mix(in srgb, var(--px-navy) 73%, transparent); backdrop-filter:none; }
-.confirm-dialog { width:min(100%, 340px); padding:22px; border:var(--px-border); border-radius:0; background:var(--px-white); color:var(--px-navy); text-align:center; box-shadow:var(--px-shadow-low); }
-.confirm-symbol { display:grid; place-items:center; width:48px; height:48px; margin:0 auto 14px; border-radius:0; background:var(--px-sky-light); color:var(--px-navy); font-size:var(--text-md); font-weight:400; }
-.confirm-symbol.danger { background:var(--px-cream); color:var(--px-navy); }
-.confirm-dialog h2 { margin:0 0 var(--px-space-2); font-size:var(--text-sm); }.confirm-dialog p { margin:0; color:var(--px-navy); font-size:var(--text-sm); line-height:1.6; }
+.confirm-backdrop { position:fixed; inset:0; z-index:3000; display:grid; place-items:center; padding:var(--px-space-5); background:color-mix(in srgb, var(--px-ink) 73%, transparent); backdrop-filter:none; }
+.confirm-dialog { width:min(100%, 340px); padding:22px; border:var(--px-border); border-radius:0; background:var(--px-surface); color:var(--px-ink); text-align:center; box-shadow:var(--px-shadow-low); }
+.confirm-symbol { display:grid; place-items:center; width:48px; height:48px; margin:0 auto 14px; border-radius:0; background:var(--px-surface-soft); color:var(--px-ink); font-size:var(--text-md); font-weight:400; }
+.confirm-symbol.danger { background:var(--px-page); color:var(--px-ink); }
+.confirm-dialog h2 { margin:0 0 var(--px-space-2); font-size:var(--text-sm); }.confirm-dialog p { margin:0; color:var(--px-ink); font-size:var(--text-sm); line-height:1.6; }
 .confirm-actions { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:22px; }
-.confirm-actions button { min-height:44px; padding:0 var(--px-space-3); border:var(--px-border); border-radius:0; background:var(--px-white); color:var(--px-navy); font:inherit; font-size:var(--text-sm); font-weight:400; cursor:pointer; }
-.confirm-actions .confirm-action { border-color:var(--px-navy); background:var(--px-yellow); color:var(--px-navy); }.confirm-actions .confirm-action.danger { border-color:var(--px-navy); background:var(--px-cream);border-color:var(--px-coral); color:var(--px-navy); }.confirm-actions button:disabled { cursor:wait; opacity:.65; }
+.confirm-actions button { min-height:44px; padding:0 var(--px-space-3); border:var(--px-border); border-radius:0; background:var(--px-surface); color:var(--px-ink); font:inherit; font-size:var(--text-sm); font-weight:400; cursor:pointer; }
+.confirm-actions .confirm-action { border-color:var(--px-ink); background:var(--px-action); color:var(--px-action-ink); }.confirm-actions .confirm-action.danger { border-color:var(--px-ink); background:var(--px-page);border-color:var(--px-warning); color:var(--px-ink); }.confirm-actions button:disabled { cursor:wait; opacity:.65; }

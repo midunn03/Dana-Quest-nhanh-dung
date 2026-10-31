@@ -133,3 +133,77 @@ it('registers durable accounts with username and password, authenticates with Ht
   expect(isolated.photos).toEqual([])
   expect(isolated.state.destinations).toEqual({})
 })
+
+async function limitedAuth(options: { trustProxy?: boolean } = {}) {
+  directory = await mkdtemp(join(tmpdir(), 'dana-auth-limits-'))
+  const api = createAuthApi({ file: join(directory, 'accounts.json'), ...options })
+  server = createServer((req, res) => api(req, res, () => { res.statusCode = 404; res.end() }))
+  await new Promise<void>(resolve => server.listen(0, '127.0.0.1', resolve))
+  const base = `http://127.0.0.1:${(server.address() as { port: number }).port}`
+  return (path: string, body: Record<string, unknown>, forwarded?: string) => fetch(`${base}/api/auth${path}`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json', Origin: base, ...(forwarded ? { 'X-Forwarded-For': forwarded } : {}) }, body: JSON.stringify(body),
+  })
+}
+
+it('does not trust changing forwarded IP headers when proxy trust is disabled', async () => {
+  const post = await limitedAuth({ trustProxy: false })
+  for (let i = 0; i < 15; i++) expect((await post('/register', { username: 'x', password: 'fixture-password' }, `198.51.100.${i+1}`)).status).toBe(400)
+  expect((await post('/register', { username: 'x', password: 'fixture-password' }, '203.0.113.7')).status).toBe(429)
+})
+
+it('separates trusted client IP limits and shares equivalent forwarded chains', async () => {
+  const post = await limitedAuth({ trustProxy: true })
+  for (let i = 0; i < 15; i++) expect((await post('/register', { username: 'x', password: 'fixture-password' }, '198.51.100.9, 10.0.0.2')).status).toBe(400)
+  expect((await post('/register', { username: 'x', password: 'fixture-password' }, '198.51.100.9')).status).toBe(429)
+  expect((await post('/register', { username: 'x', password: 'fixture-password' }, '203.0.113.9')).status).toBe(400)
+})
+
+it('falls back to the socket for malformed forwarded headers', async () => {
+  const post = await limitedAuth({ trustProxy: true })
+  for (let i = 0; i < 15; i++) expect((await post('/register', { username: 'x', password: 'fixture-password' }, `invalid-${i}`)).status).toBe(400)
+  expect((await post('/register', { username: 'x', password: 'fixture-password' }, 'invalid-last')).status).toBe(429)
+})
+
+it('locks five consecutive wrong passwords across IPs and username/email aliases, then expires', async () => {
+  const { vi } = await import('vitest')
+  const clock = vi.spyOn(Date, 'now').mockReturnValue(2_000_000_000_000)
+  try {
+    const post = await limitedAuth({ trustProxy: true })
+    expect((await post('/register', { username: 'Limit Owner', email: 'limit@example.test', password: 'fixture-password' }, '192.0.2.1')).status).toBe(200)
+    for (let i=0;i<5;i++) expect((await post('/login', { username:i%2?'LIMIT@EXAMPLE.TEST':' limit owner ', password:'wrong-password' }, `198.51.100.${i+1}`)).status).toBe(401)
+    expect((await post('/login', { username:'Limit Owner', password:'fixture-password' }, '203.0.113.1')).status).toBe(429)
+    clock.mockReturnValue(2_000_000_000_000+15*60_000+1)
+    expect((await post('/login', { username:'limit@example.test', password:'fixture-password' }, '203.0.113.2')).status).toBe(200)
+  } finally { clock.mockRestore() }
+})
+
+it('clears the consecutive-failure count after successful authentication', async () => {
+  const post = await limitedAuth({ trustProxy:true })
+  await post('/register',{username:'Reset Owner',password:'fixture-password'},'192.0.2.1')
+  for(let i=0;i<3;i++) expect((await post('/login',{username:'Reset Owner',password:'wrong-password'},`198.51.100.${i+1}`)).status).toBe(401)
+  expect((await post('/login',{username:'Reset Owner',password:'fixture-password'},'198.51.100.10')).status).toBe(200)
+  for(let i=0;i<5;i++) expect((await post('/login',{username:'Reset Owner',password:'wrong-password'},`203.0.113.${i+1}`)).status).toBe(401)
+  expect((await post('/login',{username:'Reset Owner',password:'fixture-password'},'203.0.113.10')).status).toBe(429)
+})
+
+it('reserves the account failure budget during concurrent password checks', async () => {
+  const post = await limitedAuth({trustProxy:true})
+  await post('/register',{username:'Concurrent Owner',password:'fixture-password'},'192.0.2.1')
+  const responses=await Promise.all(Array.from({length:6},(_,i)=>post('/login',{username:'Concurrent Owner',password:'wrong-password'},`198.51.100.${i+1}`)))
+  expect(responses.map(response=>response.status).sort()).toEqual([401,401,401,401,401,429])
+})
+
+it('prunes expired IP, account, sensitive and code buckets with one expiry field', async () => {
+  const {createAttemptLimiter,clientAddress}=await import('../server/auth-rate-limit.mjs')
+  let now=100
+  const entries=new Map(['ip:one','account:one','sensitive:one','codes:one'].map(key=>[key,{count:10,expires:101}]))
+  const limiter=createAttemptLimiter({attempts:entries,clock:()=>now})
+  now=102;limiter.prune();expect(entries.size).toBe(0)
+  expect(limiter.consume('codes:one',10,60_000)).toBe(true)
+  expect(clientAddress({headers:{'x-forwarded-for':'2001:0db8:0:0:0:0:0:1'},socket:{remoteAddress:'127.0.0.1'}},true)).toBe('2001:db8::1')
+})
+
+it('falls back safely for scoped IPv6 forwarded addresses', async () => {
+  const {clientAddress}=await import('../server/auth-rate-limit.mjs')
+  expect(clientAddress({headers:{'x-forwarded-for':'fe80::1%eth0'},socket:{remoteAddress:'127.0.0.1'}},true)).toBe('127.0.0.1')
+})

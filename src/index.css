@@ -1,10 +1,10 @@
-﻿:root {
+:root {
   font-family: var(--font-ui);
   font-size: var(--text-sm);
   font-weight: 400;
   line-height: 1.7;
-  color: var(--px-navy);
-  background: var(--px-cream);
+  color: var(--px-ink);
+  background: var(--px-page);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: none;
@@ -50,7 +50,7 @@ body {
   min-width: 280px;
   min-height: 100vh;
   overflow: hidden;
-  background: var(--px-cream);
+  background: var(--px-page);
 }
 
 #root {
