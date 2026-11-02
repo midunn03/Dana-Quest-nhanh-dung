@@ -49,6 +49,8 @@ Card/Badge/Modal/Input/Tab/Tooltip are not PixelUI component exports. Existing d
 
 ## Icons and illustrations
 
+The official game logo supplied31/10/2026 is rendered by `PixelLogo.tsx` from `public/brand/dana-quest-logo.png`. Preserve its yellow/green lettering, map, red pin and navy outline; do not rebuild the wordmark with fonts or recolor it to UI tokens. Header/footer, PWA/favicons, notification icon and sharing image derive from the same transparent master. Provenance and checks: `docs/OFFICIAL-LOGO-INTEGRATION.md`.
+
 `PixelIcons.tsx` contains original 16×16 icons: pin, star, gift, lock, compass, map, xp, coin. Render at integer multiples of 16 (16/32/48/64); default size is 32px. SVG uses crisp edges. Decorative icons are hidden from accessibility; meaningful standalone icons need a title or labeled parent button. Never redraw icon details with arbitrary fractional coordinates. Raster art uses `image-rendering: pixelated`.
 
 ## Motion

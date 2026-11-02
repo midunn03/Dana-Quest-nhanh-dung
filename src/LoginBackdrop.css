@@ -7,7 +7,7 @@
 .login-landing::before { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, color-mix(in srgb, var(--px-ink) 27%, transparent) 0%, color-mix(in srgb, var(--px-ink) 7%, transparent) 25%, color-mix(in srgb, var(--px-ink) 72%, transparent) 65%, color-mix(in srgb, var(--px-ink) 96%, transparent) 100%); }
 .login-landing-header { display: flex; align-items: center; justify-content: space-between; gap: var(--px-space-4); }
 .login-brand { display: inline-flex; gap: 10px; align-items: center; color: var(--px-surface); font-size: var(--text-md); font-weight: 400; letter-spacing: 0; }
-.login-logo-slot { display: block; width: 160px; max-width: 36vw; height: 40px; flex-shrink: 0; }
+.login-logo-slot { display: block; width: 128px; max-width: 36vw; height: auto; flex-shrink: 0; }
 .landing-login { display: inline-flex; align-items: center; justify-content: center; min-height: 46px; padding: 10px 17px; background: var(--px-surface); color: var(--px-ink); border-radius: 24px; font-size: var(--text-sm); font-weight: 400; text-decoration: none; box-shadow: 0 4px 15px color-mix(in srgb, var(--px-ink) 13%, transparent); }
 .login-landing-copy { margin-top: auto; padding-top: 170px; max-width: 680px; }
 .app-shell .login-landing-copy h1 { font-size: var(--text-xl); font-weight: 400; line-height: 1.5; letter-spacing: 0; margin: 0 0 18px; color: var(--px-surface); }
@@ -29,7 +29,7 @@
   .login-brand { font-size: var(--text-md); }
 }
 @media (min-width: 768px) {
-  .login-logo-slot { width: 200px; height: 48px; }
+  .login-logo-slot { width: 160px; height: auto; }
 }
 @media (min-width: 768px) {
   .landing-login { min-height: 50px; padding-inline: var(--px-space-6); font-size: var(--text-sm); }

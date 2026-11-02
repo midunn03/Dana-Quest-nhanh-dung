@@ -1,7 +1,7 @@
 # Gói ảnh Questo gốc
 
 - File gốc: Ảnh màn hình Questo-20261026T133523Z-1-001.zip.
-- Đường dẫn trong pack: source-archives/Ảnh màn hình Questo-20261026T133523Z-1-001.zip (tính từ references/).
+- Vị trí lưu trữ từ 01/11/2026: [ZIP nguồn](../../../docs/archive/source-packages/Ảnh màn hình Questo-20261026T133523Z-1-001.zip). ZIP giữ nguyên nội dung; không còn nằm trong source-archives của pack.
 - Kích thước: 86.566.990 byte.
 - Nội dung đã kiểm kê: 92 ảnh.
 - SHA-256: 607E2D48298691D300B4F6BDF94800609B3C6820DC6663FFE400B831D2C2C44D

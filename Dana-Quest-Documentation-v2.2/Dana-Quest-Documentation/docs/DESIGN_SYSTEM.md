@@ -1,5 +1,7 @@
 # Design System — Dana Quest
 
+> Cập nhật chỉ dẫn 01/11/2026: xem [DESIGN.md của dự án](../../../DESIGN.md) để tra nhận diện hiện hành, công cụ thiết kế và thư viện Awesome DESIGN.md. Màu xanh v2.2 đã được duyệt tại docs/TASKS.md của ứng dụng; các giá trị runtime nằm trong src/ExperienceTokens.css. Những đề xuất cũ về font, cỡ chữ và bo góc bên dưới vẫn là đề xuất lịch sử, không tự ghi đè STYLE_PIXEL.md hiện hành.
+
 ## Design direction
 
 Phiên bản 2.2 — 26/10/2026. Phạm vi game trình duyệt, mobile-first. Website giới thiệu hoãn. Dùng yêu cầu/nhãn quyết định ở PRD.md; đặc tả này không xác nhận code đã đạt. Workflow và quyền là nguồn chuẩn tại PRD; file này định nghĩa cách thể hiện chúng.

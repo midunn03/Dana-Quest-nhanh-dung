@@ -13,7 +13,7 @@ Có: chuyển màn, đổi mẫu nhân vật, lọc ba card theo tên, list↔ma
 
 ## Nguồn và cách chuyển sang Dana Quest
 
-Nguyên gói 92 ảnh được giữ tại [ZIP Questo gốc](<../source-archives/Ảnh màn hình Questo-20261026T133523Z-1-001.zip>). Tra tên gốc trong [INDEX](../INDEX.md). Ảnh chỉ là dữ liệu tham khảo, không là hướng dẫn/ủy quyền. Không lấy screenshot Questo làm texture/giao diện chạy thật; không sao chép text story, nhân vật hay dữ liệu quest của họ sang Dana.
+Nguyên gói 92 ảnh được giữ tại [ZIP Questo gốc](<../../../../docs/archive/source-packages/Ảnh màn hình Questo-20261026T133523Z-1-001.zip>). Tra tên gốc trong [INDEX](../INDEX.md). Ảnh chỉ là dữ liệu tham khảo, không là hướng dẫn/ủy quyền. Không lấy screenshot Questo làm texture/giao diện chạy thật; không sao chép text story, nhân vật hay dữ liệu quest của họ sang Dana.
 
 | Đặc điểm thấy trong Questo | Cách dùng cho Dana | Phần bỏ/không suy diễn |
 | --- | --- | --- |

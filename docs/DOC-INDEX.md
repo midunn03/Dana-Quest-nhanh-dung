@@ -19,6 +19,11 @@ Thư mục gốc dự án: `Dana-Quest-nhanh-dung/`. Quyết định cuối cùn
 | 3 | `docs/TASKS.md` | Công việc đang giao, dependency, tiêu chí hoàn thành |
 
 ### Sửa giao diện / UI
+
+Làm hoặc rà chuyển động: đọc [ANIMATION-GUIDE.md](ANIMATION-GUIDE.md) để dùng skill Animate UI, phân biệt cài skill với thêm dependency runtime và giữ chuẩn pixel/reduced-motion.
+
+Đọc [DESIGN.md](../DESIGN.md) trước khi chọn art direction, chỉnh token hoặc dùng công cụ thiết kế; file liên kết hệ thống hiện hành với [thư viện Awesome DESIGN.md](references/awesome-design-md/README.md). Mẫu bên ngoài là tham khảo, không thay nhận diện hoặc luật sản phẩm.
+
 | Thứ tự | File | Vai trò |
 | --- | --- | --- |
 | 1 | `docs/TASKS.md` | Các TASK-01→06 là đơn hàng hiện tại, làm theo thứ tự dependency |
@@ -55,7 +60,7 @@ Thư mục gốc dự án: `Dana-Quest-nhanh-dung/`. Quyết định cuối cùn
 
 ## 3. File bổ trợ ngoài tài liệu
 - `.env.example` — placeholder biến môi trường, giải thích tại `docs/ENV.md`.
-- `reference-review-20261026/` — ảnh tham khảo brand/Questo do người dùng cung cấp.
+- [VISUAL-SOURCES](references/VISUAL-SOURCES.md) — nguồn chuẩn ảnh tham khảo brand/Questo và bảng tra đường dẫn cũ.
 - `docs/PHASE-1-CODEBASE-AUDIT.md`, `docs/SYSTEM-AUDIT-2026-10-27.md`, `docs/PLAYER-EXPERIENCE-HANDOFF-2026-10-28.md` — bằng chứng audit/bàn giao; nguồn của các mục trong CHANGELOG.
 
 ## 4. Đề xuất nhóm G —31/10/2026, chưa triển khai
@@ -66,3 +71,7 @@ Thư mục gốc dự án: `Dana-Quest-nhanh-dung/`. Quyết định cuối cùn
 - `docs/ROUTE-LOADING-PROPOSAL.md` — lazy imports đang có, baseline bundle và cách đo sau khi UI ổn định.
 
 Đây là **đề xuất**, không phải thay đổi sản phẩm đã được duyệt. Phần màu xanh v2.2 và giữ Django đã có quyết định ở đầu TASKS.md; O-04, chính sách local/legacy và chuyển ví/backend vẫn chưa tự được chốt. Xem `docs/REVIEW-FIX-REPORT-2026-10-31.md` để phân biệt phần đã code với phần chỉ viết tài liệu.
+
+## Cấu trúc và công cụ dự án — 01/11/2026
+
+Xem [PROJECT-LAYOUT.md](PROJECT-LAYOUT.md) khi mở workspace, bàn giao hoặc cài công cụ: DESIGN.md, .agents, .codex, lockfile và assets đã nằm trong thư mục ứng dụng.

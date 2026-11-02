@@ -5,7 +5,7 @@ const fs = require('node:fs/promises')
 const path = require('node:path')
 const stage = process.argv[2] || 'after'
 if (!['before', 'after'].includes(stage)) throw new Error('Expected before or after')
-const output = path.resolve(__dirname, '../tests/visual/group-f-2026-10-31', stage)
+const output = process.env.DANA_ARTIFACT_DIR ? path.resolve(process.env.DANA_ARTIFACT_DIR,stage) : path.resolve(__dirname, '../tests/visual/group-f-2026-10-31', stage)
 const base = process.env.DANA_UI_URL || 'http://127.0.0.1:5174/'
 const screens = [['home','#/'],['discovery','#/kham-pha'],['map','#/map'],['play','#/quest/due-dau-an-50-nam/choi'],['account','#/tai-khoan'],['login','#/']]
 ;(async () => {
@@ -49,6 +49,10 @@ const screens = [['home','#/'],['discovery','#/kham-pha'],['map','#/map'],['play
     return {overflow:main.scrollWidth>main.clientWidth+1||document.documentElement.scrollWidth>innerWidth+1,navVisible:!!visible(nav),navHeight:visible(nav)?nav.getBoundingClientRect().height:0,actionHeight:actions?.getBoundingClientRect().height||0,scrollHeight:scroll.clientHeight,navToken:getComputedStyle(shell).getPropertyValue('--px-nav-height').trim(),ink:getComputedStyle(shell).color,errors:[],lang:document.documentElement.lang,controls}
    })
    geometry.errors=errors
+   if(process.env.DANA_LOGO_CHECK==='1'){
+    geometry.logos=await page.locator('.brand-logo').evaluateAll(images=>images.map(img=>({src:img.currentSrc,loaded:img.complete&&img.naturalWidth===640,width:img.getBoundingClientRect().width,height:img.getBoundingClientRect().height})))
+    geometry.logoValid=geometry.logos.length>=2&&geometry.logos.every(logo=>logo.loaded&&logo.src.includes('/brand/dana-quest-logo.png')&&Math.abs(logo.width/logo.height-640/521)<.02)
+   }
    if(stage==='after'&&['home','login'].includes(name)){
     const control=page.locator('.home-header .home-button').first()
     const normal=await control.evaluate(e=>getComputedStyle(e).backgroundColor)
@@ -59,10 +63,17 @@ const screens = [['home','#/'],['discovery','#/kham-pha'],['map','#/map'],['play
    }
    results.push({name,width,language,...geometry})
    if(width===390||width===1440)await page.screenshot({path:path.join(output,`${name}-${language}-${width}.png`),animations:'disabled'})
+   if(process.env.DANA_LOGO_CHECK==='1'&&name==='home'&&(width===390||width===1440)){
+    await page.evaluate(()=>{
+     const main=document.querySelector('.app-shell>main'),footer=document.querySelector('.home-footer'),header=document.querySelector('.home-header')
+     main.scrollTop+=footer.getBoundingClientRect().top-main.getBoundingClientRect().top-header.getBoundingClientRect().height
+    })
+    await page.screenshot({path:path.join(output,`footer-${language}-${width}.png`),animations:'disabled'})
+   }
    await context.close()
   }
   await fs.writeFile(path.join(output,'results.json'),JSON.stringify(results,null,2))
-  const failures=results.filter(r=>r.overflow||r.errors.length||r.name==='play'&&(r.navVisible||r.actionHeight!==(r.width>=768?80:112)||r.scrollHeight<100)||r.name!=='play'&&(!r.navVisible||r.navHeight!==(r.width>=768?80:112))||r.lang!==r.language||r.actionHover&&!r.actionHover.changed)
+  const failures=results.filter(r=>r.overflow||r.errors.length||r.name==='play'&&(r.navVisible||r.actionHeight!==(r.width>=768?80:112)||r.scrollHeight<100)||r.name!=='play'&&(!r.navVisible||r.navHeight!==(r.width>=768?80:112))||r.lang!==r.language||r.actionHover&&!r.actionHover.changed||r.logoValid===false)
   process.stdout.write(JSON.stringify({stage,cases:results.length,failures},null,2))
   if(failures.length)process.exitCode=1
  }finally{await browser.close()}

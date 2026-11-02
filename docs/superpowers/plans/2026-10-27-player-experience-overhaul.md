@@ -133,6 +133,6 @@ Modify: `src/App.css`, `src/Workspace.css`, `src/Discovery.css`, `src/Events.css
 
 ## Tài nguyên thiết kế đang chuẩn bị
 
-- Tham chiếu gốc: `../reference-review-20261026/brand-contact.png` tính từ thư mục dự án.
+- Tham chiếu gốc: `Dana-Quest-Documentation-v2.2/Dana-Quest-Documentation/references/brand-contact.png` tính từ thư mục dự án.
 - Concept sheet 7 phần thưởng do ImageGen tạo được lưu trong `docs/art-direction/` để duyệt hướng; chưa phải bộ 7 asset đã tích hợp.
 - Prompt và kết quả baseline được ghi riêng để người thực hiện tiếp theo phân biệt bằng chứng với đề xuất.
