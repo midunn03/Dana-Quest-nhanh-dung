@@ -1,3 +1,4 @@
+import PixelLogo from './PixelLogo'
 import { interpolate } from './i18n/locale'
 import { t } from './i18n/locale'
 import LandmarkArt from './LandmarkArt'
@@ -32,7 +33,7 @@ export default function DestinationPage({ id }: { id: string }) {
   const missions = getMissions(place)
   const needed = requiredCount(progress.selected.length)
   return <main className="quest-page arrival-screen">
-    <nav className="quest-nav"><a className="back-link" href="#/map">{t("← Bản đồ")}</a><a href="#/album">{t("Album ảnh")}</a><a href="#/" lang="en">DANA QUEST</a></nav>
+    <nav className="quest-nav"><a className="back-link" href="#/map">{t("← Bản đồ")}</a><a href="#/album">{t("Album ảnh")}</a><a href="#/" lang="en" aria-label="DANA QUEST"><PixelLogo compact/></a></nav>
     <h1>{location.sample && hasArrived(location.sample, place.position, location.now) ? interpolate("Đã đến ${0}!",[place.name]) : interpolate("Khám phá ${0}",[place.name])}</h1><div className="arrival-hero">{custom
       ? (heroPhoto ? <img className="destination-photo" src={heroPhoto.url} alt={heroPhoto.caption || place.name} /> : <span className="admin-hero-empty" aria-hidden="true" />)
       : place.photo

@@ -4,10 +4,10 @@ import { afterEach, expect, it, vi } from 'vitest'
 import { LoginBackdrop } from '../src/WelcomePage'
 
 afterEach(() => { cleanup(); vi.useRealTimers(); vi.unstubAllGlobals() })
-it('reserves an empty logo slot and loops five loaded scenery photos every 20 seconds', () => {
+it('shows the official logo and loops five loaded scenery photos every 20 seconds', () => {
   vi.useFakeTimers()
   const view = render(<LoginBackdrop />)
-  expect(view.container.querySelector('.login-logo-slot')?.children.length).toBe(0)
+  expect(view.container.querySelector('.login-logo-slot img')?.getAttribute('src')).toContain('/brand/dana-quest-logo.png')
   expect(view.container.querySelector('.login-brand svg')).toBeNull()
   const images = [...view.container.querySelectorAll('.login-landing-photo')]
   expect(images).toHaveLength(5)

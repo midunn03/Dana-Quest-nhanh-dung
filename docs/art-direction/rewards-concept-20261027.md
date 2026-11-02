@@ -2,7 +2,7 @@
 
 Trạng thái: concept để duyệt hướng, chưa phải 7 asset riêng đã tích hợp vào cửa hàng.
 
-Đầu ra: `rewards-concept-20261027.png`. Tạo bằng công cụ ImageGen tích hợp, không dùng CLI/API fallback. Tham chiếu phong cách: `reference-review-20261026/brand-contact.png` ở workspace cha. Ảnh chứa 7 vật phẩm riêng biệt: bưu thiếp Cầu Rồng, cà phê phin, quà lưu niệm, mì Quảng, xe buýt, vé tham quan và kayak. Không tạo tên nhà cung cấp hoặc mã voucher thực.
+Đầu ra: `rewards-concept-20261027.png`. Tạo bằng công cụ ImageGen tích hợp, không dùng CLI/API fallback. Tham chiếu phong cách: `Dana-Quest-Documentation-v2.2/Dana-Quest-Documentation/references/brand-contact.png` ở gốc dự án. Ảnh chứa 7 vật phẩm riêng biệt: bưu thiếp Cầu Rồng, cà phê phin, quà lưu niệm, mì Quảng, xe buýt, vé tham quan và kayak. Không tạo tên nhà cung cấp hoặc mã voucher thực.
 
 ## Prompt đã dùng
 

@@ -7,8 +7,8 @@ export async function showEventReminder(eventId:string,title:string,body:string)
  if(!remindersEnabled()||!('Notification' in window)||Notification.permission!=='granted')return
  try{
  const registration=await navigator.serviceWorker?.getRegistration()
- if(registration)return await registration.showNotification(title,{body,icon:`${import.meta.env.BASE_URL}dana-quest.svg`,data:{url:`#/su-kien/${eventId}`},tag:`dana-event-${eventId}`})
- new Notification(title,{body,icon:`${import.meta.env.BASE_URL}dana-quest.svg`,tag:`dana-event-${eventId}`})
+ if(registration)return await registration.showNotification(title,{body,icon:`${import.meta.env.BASE_URL}brand/icon-192.png`,data:{url:`#/su-kien/${eventId}`},tag:`dana-event-${eventId}`})
+ new Notification(title,{body,icon:`${import.meta.env.BASE_URL}brand/icon-192.png`,tag:`dana-event-${eventId}`})
  }catch{/* The in-app card remains available when device notifications are unsupported. */}
 }
 export async function enableEventReminders(){

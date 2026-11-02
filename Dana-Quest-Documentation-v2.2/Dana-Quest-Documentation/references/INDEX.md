@@ -150,7 +150,7 @@ Xem [bảng phân bổ 14 ý và nội dung tư vấn](REQUIREMENTS-COVERAGE.md)
 - [Mở thiết kế tương tác offline](ui-design/index.html).
 - [Bảng tổng quan bốn màn](ui-design/DESIGN-OVERVIEW.png).
 - [Chú giải cực chi tiết từng màn và biến thể](ui-design/SCREEN-SPECS.md).
-- [Nguyên ZIP 92 ảnh Questo](<source-archives/Ảnh màn hình Questo-20261026T133523Z-1-001.zip>) — giữ nguyên byte.
+- [Nguyên ZIP 92 ảnh Questo](<../../../docs/archive/source-packages/Ảnh màn hình Questo-20261026T133523Z-1-001.zip>) — giữ nguyên byte.
 - [Checksum và chính sách dùng source](SOURCE-ARCHIVE.md).
 
 Bản v2.2 có 33 màn/biến thể prototype, 9 ảnh nguồn được bổ sung thành file riêng bên cạnh ZIP nguyên bản. Source screenshot chỉ để review, không tự công khai GitHub.
